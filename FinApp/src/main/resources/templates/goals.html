@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goals</title>
+
+
+
+    <style>
+        /* CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #90cae7d8 0%, #03668e 100%);
+            padding: 20px;
+        }
+
+        header {
+            background-color: navy;
+            color: #fff;
+            padding: 25px 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        header nav ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        header nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+
+        header nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        main {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .goals-list{
+            flex: 1;
+            margin-right: 20px;
+            text-align: center;
+        }
+
+        .add-goal {
+            flex: 1;
+            margin-right: 20px;
+
+            text-align: center;
+        }
+
+        .goal-card {
+            background-color: #f0f0f0c6;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #adding {
+            background-color: #f0f0f0c6;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 200px;
+        }
+
+        .add-goal h2 {
+            margin-top:60;
+
+
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 20%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 18px;
+            cursor: pointer;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: auto; /* Push footer to the bottom */
+            padding: 8px 0;
+
+            color: #030303;
+            width: 100%;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+<header>
+    <h1>Goals</h1>
+    <nav>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="transactions.html">Transactions</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="goals-container">
+    <section class="goals-list">
+        <h2>Current Goals</h2>
+        <div id="goalsList">
+            <!-- Goals will be added dynamically here -->
+        </div>
+    </section>
+
+    <section class="add-goal">
+        <h2>Add New Goal</h2>
+        <div id="adding">
+            <form id="addGoalForm">
+                <div class="form-group">
+                    <label for="goalName">Goal Name:</label>
+                    <input type="text" id="goalName" name="goalName" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalAmount">Goal Amount:</label>
+                    <input type="number" id="goalAmount" name="goalAmount" min="0" step="0.01" required>
+                </div>
+                <button type="submit">Add Goal</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2024 Your Finance App</p>
+
+</footer>
+
+
+<script>
+    // JavaScript code
+    document.addEventListener('DOMContentLoaded', function() {
+        const goalsList = document.getElementById('goalsList');
+        const addGoalForm = document.getElementById('addGoalForm');
+
+        let goals = [
+            { id: 1, name: 'Vacation Fund', amount: 2000.00, saved: 1000.00 },
+            { id: 2, name: 'Emergency Fund', amount: 5000.00, saved: 2500.00 }
+        ];
+
+        function renderGoals() {
+            goalsList.innerHTML = '';
+
+            goals.forEach(goal => {
+                const goalCard = document.createElement('div');
+                goalCard.classList.add('goal-card');
+                goalCard.innerHTML = `
+        <h3>${goal.name}</h3>
+        <input type="text" class="edit-name" value="${goal.name}" style="display:none;">
+        <p>Goal Amount: $<span class="display-amount">${goal.amount.toFixed(2)}</span></p>
+        <input type="number" class="edit-amount" value="${goal.amount.toFixed(2)}" style="display:none;">
+        <p>Saved: $<span class="display-saved">${goal.saved.toFixed(2)}</span></p>
+        <input type="number" class="edit-saved" value="${goal.saved.toFixed(2)}" style="display:none;">
+        <progress value="${goal.saved}" max="${goal.amount}" class="goal-progress"></progress>
+        <div class="goal-actions">
+          <button class="edit-goal" data-id="${goal.id}">Edit</button>
+          <button class="save-goal" data-id="${goal.id}" style="display:none;">Save</button>
+          <button class="cancel-goal" data-id="${goal.id}" style="display:none;">Cancel</button>
+          <button class="delete-goal" data-id="${goal.id}">Delete</button>
+        </div>
+      `;
+                goalsList.appendChild(goalCard);
+            });
+        }
+
+        renderGoals();
+
+        addGoalForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const goalName = addGoalForm.goalName.value.trim();
+            const goalAmount = parseFloat(addGoalForm.goalAmount.value);
+
+            if (goalName && goalAmount > 0) {
+                const id = goals.length > 0 ? goals[goals.length - 1].id + 1 : 1;
+                const newGoal = {
+                    id,
+                    name: goalName,
+                    amount: goalAmount,
+                    saved: 0
+                };
+
+                goals.push(newGoal);
+                renderGoals();
+                addGoalForm.reset();
+            } else {
+                alert('Please enter valid goal name and amount.');
+            }
+        });
+
+        goalsList.addEventListener('click', function(event) {
+            const id = parseInt(event.target.getAttribute('data-id'), 10);
+
+            if (event.target.classList.contains('edit-goal')) {
+                toggleEditMode(id, true);
+            } else if (event.target.classList.contains('save-goal')) {
+                saveGoal(id);
+            } else if (event.target.classList.contains('cancel-goal')) {
+                toggleEditMode(id, false);
+            } else if (event.target.classList.contains('delete-goal')) {
+                deleteGoal(id);
+            }
+        });
+
+        function toggleEditMode(id, isEditing) {
+            const goalCard = document.querySelector(`.goal-card button[data-id="${id}"]`).parentElement.parentElement;
+            const editFields = goalCard.querySelectorAll('.edit-name, .edit-amount, .edit-saved');
+            const displayFields = goalCard.querySelectorAll('h3, .display-amount, .display-saved');
+            const buttons = goalCard.querySelectorAll('.edit-goal, .save-goal, .cancel-goal');
+
+            editFields.forEach(field => field.style.display = isEditing ? 'inline' : 'none');
+            displayFields.forEach(field => field.style.display = isEditing ? 'none' : 'inline');
+            buttons[0].style.display = isEditing ? 'none' : 'inline'; // Edit button
+            buttons[1].style.display = isEditing ? 'inline' : 'none'; // Save button
+            buttons[2].style.display = isEditing ? 'inline' : 'none'; // Cancel button
+
+            // Ensure progress bar visibility
+            const progressBar = goalCard.querySelector('.goal-progress');
+            if (progressBar) {
+                progressBar.style.display = 'block';
+                progressBar.style.position = 'relative';
+
+                progressBar.style.right = '200px';
+
+            }
+        }
+
+        function saveGoal(id) {
+            const goalCard = document.querySelector(`.goal-card button[data-id="${id}"]`).parentElement.parentElement;
+            const goal = goals.find(goal => goal.id === id);
+
+            if (goal) {
+                const newName = goalCard.querySelector('.edit-name').value.trim();
+                const newAmount = parseFloat(goalCard.querySelector('.edit-amount').value);
+                const newSaved = parseFloat(goalCard.querySelector('.edit-saved').value);
+
+                if (newName && !isNaN(newAmount) && !isNaN(newSaved)) {
+                    goal.name = newName;
+                    goal.amount = newAmount;
+                    goal.saved = newSaved;
+                    renderGoals();
+                } else {
+                    alert('Invalid input. Please try again.');
+                }
+            }
+        }
+
+        function deleteGoal(id) {
+            if (confirm(`Are you sure you want to delete goal with ID ${id}?`)) {
+                goals = goals.filter(goal => goal.id !== id);
+                renderGoals();
+            }
+        }
+    });
+
+
+</script>
+
+
+
+
+
+</body>
+</html>
